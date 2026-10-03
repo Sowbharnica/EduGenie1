@@ -2,26 +2,42 @@
 <html lang="en">
 
 <head>
+
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-    <title>EduGenie - Learning Assistant</title>
+    <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1.0"
+    >
 
-    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <title>EduGenie - AI Learning Assistant</title>
+
+    <link
+        rel="stylesheet"
+        href="{{ url_for('static', filename='style.css') }}"
+    >
+
 </head>
 
 <body>
 
     <header>
-        <div class="logo">🎓 EduGenie</div>
+
+        <div class="logo">
+            🎓 EduGenie
+        </div>
 
         <p>AI-Powered Learning Assistant</p>
 
-        <span>Learn • Practice • Understand</span>
+        <span>
+            Learn • Practice • Understand
+        </span>
+
     </header>
 
 
     <main>
+
 
         <!-- Ask Question -->
 
@@ -29,41 +45,51 @@
 
             <h2>💬 Ask EduGenie</h2>
 
-            <p>Ask an educational question.</p>
+            <p>
+                Ask any question and get an AI-generated answer.
+            </p>
 
             <textarea
                 id="question"
-                placeholder="Example: What is Java?"
+                placeholder="Example: Explain polymorphism in Java"
             ></textarea>
 
             <button onclick="askQuestion()">
                 Ask Question
             </button>
 
-            <div id="answer" class="result"></div>
+            <div
+                id="answer"
+                class="result"
+            ></div>
 
         </section>
 
 
-        <!-- Simplify -->
+        <!-- Simplify Concept -->
 
         <section class="card">
 
             <h2>🧠 Simplify a Concept</h2>
 
-            <p>Understand difficult concepts easily.</p>
+            <p>
+                Understand difficult concepts in simple language.
+            </p>
 
             <input
                 type="text"
                 id="concept"
-                placeholder="Example: DBMS"
+                placeholder="Example: DBMS normalization"
             >
 
             <button onclick="simplifyConcept()">
                 Explain Simply
             </button>
 
-            <div id="simpleAnswer" class="result"></div>
+            <div
+                id="simpleAnswer"
+                class="result"
+            ></div>
 
         </section>
 
@@ -74,19 +100,24 @@
 
             <h2>📝 Generate Quiz</h2>
 
-            <p>Test your knowledge.</p>
+            <p>
+                Generate 5 questions and test your knowledge.
+            </p>
 
             <input
                 type="text"
                 id="quizTopic"
-                placeholder="Java / Python / DBMS"
+                placeholder="Example: Java OOP"
             >
 
             <button onclick="generateQuiz()">
                 Generate Quiz
             </button>
 
-            <div id="quizResult" class="result"></div>
+            <div
+                id="quizResult"
+                class="result"
+            ></div>
 
         </section>
 
@@ -97,19 +128,24 @@
 
             <h2>📚 Learning Path</h2>
 
-            <p>Get a structured learning roadmap.</p>
+            <p>
+                Get a structured learning roadmap.
+            </p>
 
             <input
                 type="text"
                 id="pathTopic"
-                placeholder="Python / Java / SQL"
+                placeholder="Example: Java Full Stack"
             >
 
             <button onclick="generatePath()">
                 Create Learning Path
             </button>
 
-            <div id="pathResult" class="result"></div>
+            <div
+                id="pathResult"
+                class="result"
+            ></div>
 
         </section>
 
@@ -120,7 +156,9 @@
 
             <h2>📄 Summarize Text</h2>
 
-            <p>Convert long text into a short summary.</p>
+            <p>
+                Convert long educational text into a short summary.
+            </p>
 
             <textarea
                 id="summaryText"
@@ -131,19 +169,29 @@
                 Summarize
             </button>
 
-            <div id="summaryResult" class="result"></div>
+            <div
+                id="summaryResult"
+                class="result"
+            ></div>
 
         </section>
+
 
     </main>
 
 
     <footer>
-        <p>EduGenie © 2026 | Educational Learning Assistant</p>
+
+        <p>
+            EduGenie © 2026 | AI Educational Learning Assistant
+        </p>
+
     </footer>
 
 
-    <script src="{{ url_for('static', filename='script.js') }}"></script>
+    <script
+        src="{{ url_for('static', filename='script.js') }}"
+    ></script>
 
 </body>
 

@@ -1,163 +1,230 @@
+// -----------------------------
+// Ask Question
+// -----------------------------
+
 async function askQuestion() {
 
-    const question = document.getElementById("question").value;
-
+    const question = document.getElementById("question").value.trim();
     const result = document.getElementById("answer");
 
-    result.innerText = "Thinking...";
-
-    const response = await fetch("/ask", {
-
-        method: "POST",
-
-        headers: {
-            "Content-Type": "application/json"
-        },
-
-        body: JSON.stringify({
-            question: question
-        })
-    });
-
-    const data = await response.json();
-
-    result.innerText = data.response;
-}
-
-
-async function simplifyConcept() {
-
-    const topic = document.getElementById("concept").value;
-
-    const result = document.getElementById("simpleAnswer");
-
-    result.innerText = "Preparing simple explanation...";
-
-    const response = await fetch("/simplify", {
-
-        method: "POST",
-
-        headers: {
-            "Content-Type": "application/json"
-        },
-
-        body: JSON.stringify({
-            topic: topic
-        })
-    });
-
-    const data = await response.json();
-
-    result.innerText = data.response;
-}
-
-
-async function generateQuiz() {
-
-    const topic = document.getElementById("quizTopic").value;
-
-    const result = document.getElementById("quizResult");
-
-    result.innerHTML = "Generating quiz...";
-
-    const response = await fetch("/quiz", {
-
-        method: "POST",
-
-        headers: {
-            "Content-Type": "application/json"
-        },
-
-        body: JSON.stringify({
-            topic: topic
-        })
-    });
-
-    const data = await response.json();
-
-    if (!data.quiz || data.quiz.length === 0) {
-
-        result.innerText = data.message;
-
+    if (!question) {
+        result.innerText = "Please enter a question.";
         return;
     }
 
-    let html = "";
+    result.innerText = "Thinking...";
 
-    data.quiz.forEach((item, index) => {
+    try {
 
-        html += `
-            <div class="quiz-question">
+        const response = await fetch("/ask", {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json"
+            },
+            body: JSON.stringify({
+                question: question
+            })
+        });
 
-                <strong>
-                    ${index + 1}. ${item.question}
-                </strong>
+        const data = await response.json();
 
-                <ul>
-                    ${item.options.map(option => `<li>${option}</li>`).join("")}
-                </ul>
+        result.innerText = data.response;
 
-                <p>
-                    <strong>Answer:</strong> ${item.answer}
-                </p>
+    } catch (error) {
 
-            </div>
-        `;
-    });
-
-    result.innerHTML = html;
+        result.innerText =
+            "Unable to connect to EduGenie. Please try again.";
+    }
 }
 
+
+// -----------------------------
+// Simplify Concept
+// -----------------------------
+
+async function simplifyConcept() {
+
+    const topic = document.getElementById("concept").value.trim();
+    const result = document.getElementById("simpleAnswer");
+
+    if (!topic) {
+        result.innerText = "Please enter a concept.";
+        return;
+    }
+
+    result.innerText = "Preparing simple explanation...";
+
+    try {
+
+        const response = await fetch("/simplify", {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json"
+            },
+            body: JSON.stringify({
+                topic: topic
+            })
+        });
+
+        const data = await response.json();
+
+        result.innerText = data.response;
+
+    } catch (error) {
+
+        result.innerText =
+            "Unable to connect to EduGenie.";
+    }
+}
+
+
+// -----------------------------
+// Generate Quiz
+// -----------------------------
+
+async function generateQuiz() {
+
+    const topic = document.getElementById("quizTopic").value.trim();
+    const result = document.getElementById("quizResult");
+
+    if (!topic) {
+        result.innerText = "Please enter a topic.";
+        return;
+    }
+
+    result.innerText = "Generating quiz...";
+
+    try {
+
+        const response = await fetch("/quiz", {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json"
+            },
+            body: JSON.stringify({
+                topic: topic
+            })
+        });
+
+        const data = await response.json();
+
+        if (!data.quiz || data.quiz.length === 0) {
+            result.innerText =
+                data.message || "Could not generate quiz.";
+            return;
+        }
+
+        let html = "";
+
+        data.quiz.forEach((item, index) => {
+
+            html += `
+                <div class="quiz-question">
+
+                    <strong>
+                        ${index + 1}. ${item.question}
+                    </strong>
+
+                    <ul>
+                        ${item.options.map(
+                            option => `<li>${option}</li>`
+                        ).join("")}
+                    </ul>
+
+                    <p>
+                        <strong>Answer:</strong>
+                        ${item.answer}
+                    </p>
+
+                </div>
+            `;
+        });
+
+        result.innerHTML = html;
+
+    } catch (error) {
+
+        result.innerText =
+            "Unable to generate quiz. Please try again.";
+    }
+}
+
+
+// -----------------------------
+// Learning Path
+// -----------------------------
 
 async function generatePath() {
 
-    const topic = document.getElementById("pathTopic").value;
-
+    const topic = document.getElementById("pathTopic").value.trim();
     const result = document.getElementById("pathResult");
+
+    if (!topic) {
+        result.innerText = "Please enter a subject.";
+        return;
+    }
 
     result.innerText = "Creating learning path...";
 
-    const response = await fetch("/learning-path", {
+    try {
 
-        method: "POST",
+        const response = await fetch("/learning-path", {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json"
+            },
+            body: JSON.stringify({
+                topic: topic
+            })
+        });
 
-        headers: {
-            "Content-Type": "application/json"
-        },
+        const data = await response.json();
 
-        body: JSON.stringify({
-            topic: topic
-        })
-    });
+        result.innerText = data.response;
 
-    const data = await response.json();
+    } catch (error) {
 
-    result.innerText = data.response.join("\n");
+        result.innerText =
+            "Unable to create learning path.";
+    }
 }
 
 
+// -----------------------------
+// Summarize Text
+// -----------------------------
+
 async function summarizeText() {
 
-    const text = document.getElementById("summaryText").value;
-
+    const text = document.getElementById("summaryText").value.trim();
     const result = document.getElementById("summaryResult");
+
+    if (!text) {
+        result.innerText = "Please enter some text.";
+        return;
+    }
 
     result.innerText = "Creating summary...";
 
-    const response = await fetch("/summarize", {
+    try {
 
-        method: "POST",
+        const response = await fetch("/summarize", {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json"
+            },
+            body: JSON.stringify({
+                text: text
+            })
+        });
 
-        headers: {
-            "Content-Type": "application/json"
-        },
+        const data = await response.json();
 
-        body: JSON.stringify({
-            text: text
-        })
-    });
+        result.innerText = data.response;
 
-    const data = await response.json();
+    } catch (error) {
 
-    result.innerText = data.response;
+        result.innerText =
+            "Unable to create summary.";
+    }
 }

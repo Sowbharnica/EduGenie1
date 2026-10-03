@@ -92,6 +92,7 @@ button:hover {
     border-radius: 8px;
     line-height: 1.6;
     white-space: pre-line;
+    overflow-wrap: break-word;
 }
 
 .quiz-question {
@@ -99,11 +100,16 @@ button:hover {
     padding: 15px;
     background: white;
     border-radius: 8px;
+    border: 1px solid #ddd;
 }
 
 .quiz-question ul {
     margin-top: 10px;
     margin-left: 20px;
+}
+
+.quiz-question li {
+    margin-bottom: 5px;
 }
 
 footer {

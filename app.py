@@ -5,35 +5,19 @@ import urllib.error
 
 app = Flask(__name__)
 
+# -----------------------------
+# Ollama Configuration
+# -----------------------------
+
 OLLAMA_URL = "http://localhost:11434/api/generate"
 MODEL = "llama3.2:3b"
 
 
 # -----------------------------
-# Ask Local AI
+# Send Prompt to Ollama
 # -----------------------------
 
-def ask_local_ai(question):
-    prompt = f"""
-You are EduGenie, a friendly educational learning assistant.
-
-Answer the student's question clearly and accurately.
-
-Rules:
-- Give a direct answer first.
-- Explain in simple language.
-- Use examples when useful.
-- If the question is about programming, include a small example when appropriate.
-- If the student asks for a comparison, use clear points or a table.
-- If the student asks something outside academics, you can still answer helpfully.
-- Do not say that you are using Ollama or a local model.
-- Do not say that you only know prepared questions.
-- If you are unsure about something, clearly say that you are unsure instead of inventing facts.
-
-Student question:
-{question}
-"""
-
+def ask_local_ai(prompt):
     data = {
         "model": MODEL,
         "prompt": prompt,
@@ -44,13 +28,20 @@ Student question:
         req = urllib.request.Request(
             OLLAMA_URL,
             data=json.dumps(data).encode("utf-8"),
-            headers={"Content-Type": "application/json"}
+            headers={
+                "Content-Type": "application/json"
+            }
         )
 
         with urllib.request.urlopen(req, timeout=120) as response:
-            result = json.loads(response.read().decode("utf-8"))
+            result = json.loads(
+                response.read().decode("utf-8")
+            )
 
-        return result.get("response", "Sorry, I could not generate an answer.")
+        return result.get(
+            "response",
+            "Sorry, I could not generate an answer."
+        )
 
     except urllib.error.URLError:
         return "Ollama is not running. Please start Ollama and try again."
@@ -69,12 +60,13 @@ def home():
 
 
 # -----------------------------
-# Ask Question
+# Ask ANY Question
 # -----------------------------
 
 @app.route("/ask", methods=["POST"])
 def ask():
-    data = request.get_json()
+    data = request.get_json(silent=True) or {}
+
     question = data.get("question", "").strip()
 
     if not question:
@@ -82,7 +74,30 @@ def ask():
             "response": "Please enter a question."
         })
 
-    answer = ask_local_ai(question)
+    prompt = f"""
+You are EduGenie, a friendly AI-powered educational learning assistant.
+
+The student can ask ANY question.
+
+Answer the question directly and accurately.
+
+Rules:
+- Do not use prepared or hardcoded answers.
+- Generate the answer based on the student's question.
+- Explain in simple language.
+- Give examples when useful.
+- For programming questions, include a small code example when appropriate.
+- For comparison questions, use clear points or a table.
+- For academic questions, make the explanation suitable for a college student.
+- If the question is outside academics, answer helpfully.
+- If you are unsure, clearly say that you are unsure.
+- Do not mention Ollama or the local model.
+
+Student question:
+{question}
+"""
+
+    answer = ask_local_ai(prompt)
 
     return jsonify({
         "response": answer
@@ -95,7 +110,8 @@ def ask():
 
 @app.route("/simplify", methods=["POST"])
 def simplify():
-    data = request.get_json()
+    data = request.get_json(silent=True) or {}
+
     topic = data.get("topic", "").strip()
 
     if not topic:
@@ -104,18 +120,22 @@ def simplify():
         })
 
     prompt = f"""
-Explain the following concept to a college student in very simple language.
+You are EduGenie, an educational learning assistant.
+
+Explain this concept to a college student in very simple language.
 
 Concept:
 {topic}
 
 Give:
+
 1. Simple definition
 2. Easy explanation
-3. One real-life example
-4. One small technical example if relevant
+3. Real-life example
+4. Technical example if relevant
+5. One important point to remember
 
-Keep it clear and easy to understand.
+Keep the answer clear and beginner-friendly.
 """
 
     answer = ask_local_ai(prompt)
@@ -131,7 +151,8 @@ Keep it clear and easy to understand.
 
 @app.route("/learning-path", methods=["POST"])
 def learning_path():
-    data = request.get_json()
+    data = request.get_json(silent=True) or {}
+
     topic = data.get("topic", "").strip()
 
     if not topic:
@@ -140,12 +161,21 @@ def learning_path():
         })
 
     prompt = f"""
+You are EduGenie, an educational learning assistant.
+
 Create a beginner-friendly learning path for:
 
 {topic}
 
-Give the topics in the correct order from beginner to intermediate.
-Number each step and keep the explanation short.
+Start from the basics and gradually move to intermediate topics.
+
+Format:
+Step 1: Topic - short explanation
+Step 2: Topic - short explanation
+Step 3: Topic - short explanation
+
+Include the important topics in the correct learning order.
+Keep the explanation short and clear.
 """
 
     answer = ask_local_ai(prompt)
@@ -156,12 +186,13 @@ Number each step and keep the explanation short.
 
 
 # -----------------------------
-# Quiz
+# Generate Quiz
 # -----------------------------
 
 @app.route("/quiz", methods=["POST"])
 def quiz():
-    data = request.get_json()
+    data = request.get_json(silent=True) or {}
+
     topic = data.get("topic", "").strip()
 
     if not topic:
@@ -171,35 +202,60 @@ def quiz():
         })
 
     prompt = f"""
-Create 5 multiple-choice quiz questions about:
+Create exactly 5 multiple-choice questions about:
 
 {topic}
 
-For every question provide:
-- Question
-- A
-- B
-- C
-- D
-- Correct answer
+The questions should be suitable for a college beginner.
 
-Make the questions suitable for a college beginner.
+Return ONLY valid JSON in this exact format:
+
+{{
+    "questions": [
+        {{
+            "question": "Question text",
+            "options": [
+                "A. Option 1",
+                "B. Option 2",
+                "C. Option 3",
+                "D. Option 4"
+            ],
+            "answer": "A. Option 1"
+        }}
+    ]
+}}
+
+Do not include markdown.
+Do not include explanations outside the JSON.
 """
 
     answer = ask_local_ai(prompt)
 
-    return jsonify({
-        "quiz": answer
-    })
+    try:
+        quiz_data = json.loads(answer)
+
+        questions = quiz_data.get("questions", [])
+
+        return jsonify({
+            "quiz": questions
+        })
+
+    except json.JSONDecodeError:
+
+        return jsonify({
+            "quiz": [],
+            "message": "Could not generate the quiz correctly. Please try again."
+        })
 
 
 # -----------------------------
-# Summarizer
+# Summarize Text
 # -----------------------------
 
 @app.route("/summarize", methods=["POST"])
 def summarize():
-    data = request.get_json()
+    data = request.get_json(silent=True) or {}
+
     text = data.get("text", "").strip()
 
     if not text:
@@ -208,15 +264,20 @@ def summarize():
         })
 
     prompt = f"""
-Summarize the following text in simple language.
+You are EduGenie, an educational learning assistant.
+
+Summarize the following educational text in simple language.
 
 Give:
-- Main idea
-- Important points
-- Short summary
+
+1. Main idea
+2. Important points
+3. Short summary
 
 Text:
 {text}
+
+Keep the summary clear and concise.
 """
 
     answer = ask_local_ai(prompt)
@@ -230,5 +291,9 @@ Text:
 # Run Flask
 # -----------------------------
 
-if __name__ == "__main__":
-    app.run(host="0.0.0.0", port=5000)
+if __name__=="__main__" :
+    app.run(
+        host="0.0.0.0",
+        port=5000,
+        debug=False
+    )
